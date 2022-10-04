@@ -122,7 +122,7 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerDropItem(class UItem* Item, const int32 Quantity);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Item")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	TSubclassOf<class APickup> PickupClass;
 
 protected:

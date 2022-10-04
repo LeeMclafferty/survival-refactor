@@ -72,8 +72,11 @@ void ASurvivalCharacter::DropItem(UItem* Item, const int32 Quantity)
 	if (!PlayerInventory || !Item || !PlayerInventory->FindItem(Item))
 		return;
 
-	if(!HasAuthority())
+	if (!HasAuthority())
+	{
 		ServerDropItem(Item, Quantity);
+		return;
+	}
 
 	const int32 ItemQuantity = Item->GetQuantity();
 	const int32 DroppedQuantity = PlayerInventory->ConsumeItem(Item, Quantity);

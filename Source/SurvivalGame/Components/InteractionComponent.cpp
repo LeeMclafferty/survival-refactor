@@ -44,7 +44,6 @@ void UInteractionComponent::BeginFocus(ASurvivalCharacter* Character)
 
 	OnBeginFocus.Broadcast(Character);
 
-	SetHiddenInGame(false);
 	
 	if (!GetOwner()->HasAuthority())
 	{
@@ -53,6 +52,7 @@ void UInteractionComponent::BeginFocus(ASurvivalCharacter* Character)
 		{
 			if (UPrimitiveComponent* Primative = Cast<UPrimitiveComponent>(VisualComp))
 			{
+				SetHiddenInGame(false);
 				Primative->SetRenderCustomDepth(true);
 			}
 		}

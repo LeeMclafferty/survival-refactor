@@ -14,6 +14,8 @@ UFoodItem::UFoodItem()
 void UFoodItem::Use(ASurvivalCharacter* Character)
 {
 	//TODO: Heal Character
+
+	UE_LOG(LogTemp, Warning, TEXT("Nom Nom"));
 }
 
 #undef LOCTEXT_NAMESPACE

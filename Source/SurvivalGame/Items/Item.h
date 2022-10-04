@@ -97,5 +97,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	FORCEINLINE int32 GetQuantity() const { return Quantity; }
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pickup")
+	TSubclassOf<class APickup> PickupClass;
 	
 };
