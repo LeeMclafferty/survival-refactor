@@ -29,6 +29,9 @@ public:
 	bool bInteractHeld;
 };
 
+//Call whenever a EEquippableSlot changes for the player.
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEquippedItemsChanged, const EEquippableSlot, Slot, const UEquippableItem*, Item);
+
 UCLASS()
 class SURVIVALGAME_API ASurvivalCharacter : public ACharacter
 {
@@ -37,6 +40,13 @@ class SURVIVALGAME_API ASurvivalCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	ASurvivalCharacter();
+
+	// Hold default body parts for Character.
+	UPROPERTY(BlueprintReadOnly, Category = "Mesh")
+	TMap<EEquippableSlot, USkeletalMesh*> BareMesh;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Mesh")
+	TMap<EEquippableSlot, class USkeletalMeshComponent*> PlayerMeshes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Components")
 	class UInventoryComponent* PlayerInventory;
@@ -125,7 +135,28 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Item")
 	TSubclassOf<class APickup> PickupClass;
 
+public:
+
+	bool EquipItem(class UEquippableItem* Item);
+	bool UnequipItem(class UEquippableItem* Item);
+
+	void EquipGear(class UGearItem* Gear);
+	void UnequipGear(EEquippableSlot Slot);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnEquippedItemsChanged OnEquippedItemsChanged;
+
+	UFUNCTION(BlueprintPure)
+	class USkeletalMeshComponent* GetSlotSkeletalMeshComp(const EEquippableSlot Slot);
+
+	UFUNCTION(BlueprintPure)
+	FORCEINLINE TMap<EEquippableSlot, UEquippableItem*> GetEquippedItems() const { return EquippedItems; }
+
 protected:
+
+	UPROPERTY(VisibleAnywhere, Category = "Items")
+	TMap<EEquippableSlot, UEquippableItem*> EquippedItems;
+
 	void MoveForward(float Val);
 	void MoveRight(float Val);
 

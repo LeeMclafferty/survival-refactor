@@ -4,11 +4,15 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Containers/Map.h"
+#include "Materials/MaterialInstance.h"
 
 #include "Components/InteractionComponent.h"
 #include "Components/InventoryComponent.h"
 #include "Items/Item.h"
 #include "World/Pickup.h"
+#include "Items/EquippableItem.h"
+#include "Items/GearItem.h"
 
 
 // Sets default values
@@ -28,6 +32,12 @@ ASurvivalCharacter::ASurvivalCharacter()
 void ASurvivalCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// I might need to come back and as a conditional here to only do this on the first spawn in.
+	for (auto& PlayerMesh : PlayerMeshes)
+	{
+		BareMesh.Add(PlayerMesh.Key, PlayerMesh.Value->SkeletalMesh);
+	}
 	
 }
 
@@ -98,6 +108,53 @@ void ASurvivalCharacter::DropItem(UItem* Item, const int32 Quantity)
 	
 }
 
+bool ASurvivalCharacter::EquipItem(UEquippableItem* Item)
+{
+	EquippedItems.Add(Item->Slot, Item);
+	OnEquippedItemsChanged.Broadcast(Item->Slot, Item);
+	return true;
+}
+
+bool ASurvivalCharacter::UnequipItem(UEquippableItem* Item)
+{
+	if(!Item || !EquippedItems.Contains(Item->Slot) || Item != *EquippedItems.Find(Item->Slot))
+		return false;
+
+	EquippedItems.Remove(Item->Slot);
+	OnEquippedItemsChanged.Broadcast(Item->Slot, nullptr);
+	return true;
+}
+
+void ASurvivalCharacter::EquipGear(UGearItem* Gear)
+{
+	if (USkeletalMeshComponent* GearMesh = *PlayerMeshes.Find(Gear->Slot))
+	{
+		GearMesh->SetSkeletalMesh(Gear->Mesh);
+		GearMesh->SetMaterial(GearMesh->GetMaterials().Num() - 1, Gear->MaterialInstance);
+	}
+}
+
+void ASurvivalCharacter::UnequipGear(EEquippableSlot Slot)
+{
+	if (USkeletalMeshComponent* PlayerMesh = *PlayerMeshes.Find(Slot))
+	{
+		if (USkeletalMesh* BodyMesh = *BareMesh.Find(Slot))
+		{
+			PlayerMesh->SetSkeletalMesh(BodyMesh);
+
+			for (int i = 0; i < BodyMesh->GetMaterials().Num(); i++)
+			{
+				if (BodyMesh->GetMaterials().IsValidIndex(i))
+					PlayerMesh->SetMaterial(i, BodyMesh->GetMaterials()[i].MaterialInterface);
+			}
+		}
+		else
+		{
+			PlayerMesh->SetSkeletalMesh(nullptr);
+		}
+	}
+}
+
 void ASurvivalCharacter::ServerDropItem_Implementation(UItem* Item, const int32 Quantity)
 {
 	DropItem(Item, Quantity);
@@ -106,6 +163,14 @@ void ASurvivalCharacter::ServerDropItem_Implementation(UItem* Item, const int32 
 bool ASurvivalCharacter::ServerDropItem_Validate(UItem* Item, const int32 Quantity)
 {
 	return true;
+}
+
+USkeletalMeshComponent* ASurvivalCharacter::GetSlotSkeletalMeshComp(const EEquippableSlot Slot)
+{
+	if(!PlayerMeshes.Contains(Slot))
+		return nullptr;
+
+	return *PlayerMeshes.Find(Slot);
 }
 
 void ASurvivalCharacter::MoveForward(float Val)
@@ -369,6 +434,23 @@ void ASurvivalCharacter::SetupComps()
 	PlayerInventory->SetCapacity(Capaciy);
 	PlayerInventory->SetWeightCapacity(CarryWeight);
 
+	HelmetMesh = PlayerMeshes.Add(EEquippableSlot::EIS_Helmet, CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HelmetMesh")));
+	ChestMesh = PlayerMeshes.Add(EEquippableSlot::EIS_Chest, CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ChestMesh")));
+	LegsMesh = PlayerMeshes.Add(EEquippableSlot::EIS_Legs, CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("LegsMesh")));
+	FeetMesh = PlayerMeshes.Add(EEquippableSlot::EIS_Feet, CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FeetMesh")));
+	VestMesh = PlayerMeshes.Add(EEquippableSlot::EIS_Vest, CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("VestMesh")));
+	HandsMesh = PlayerMeshes.Add(EEquippableSlot::EIS_Hands, CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandsMesh")));
+	BackpackMesh = PlayerMeshes.Add(EEquippableSlot::EIS_Backpack, CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BackpackMesh")));
+
+	for (auto& PlayerMesh : PlayerMeshes)
+	{
+		USkeletalMeshComponent* MeshComp = PlayerMesh.Value;
+		MeshComp->SetupAttachment(GetMesh());
+		MeshComp->SetMasterPoseComponent(GetMesh());
+	}
+
+	//Add the head last so that it is not attached to the its self in the for loop since the head is set to the spot that GetMesh() returns.
+	PlayerMeshes.Add(EEquippableSlot::EIS_Head, CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HeadMesh")));
 }
 
 void ASurvivalCharacter::DrawLookDebug()
