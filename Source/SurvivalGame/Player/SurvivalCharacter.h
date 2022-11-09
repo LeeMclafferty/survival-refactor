@@ -114,8 +114,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
 	int32 Capaciy;
-public:
 
+public:
 	bool IsInteracting() const;
 
 	float GetRemainingInerteractTime() const;
@@ -136,7 +136,6 @@ public:
 	TSubclassOf<class APickup> PickupClass;
 
 public:
-
 	bool EquipItem(class UEquippableItem* Item);
 	bool UnequipItem(class UEquippableItem* Item);
 

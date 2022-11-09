@@ -400,34 +400,6 @@ void ASurvivalCharacter::SetupComps()
 	CameraComponent->SetupAttachment(GetMesh(), TEXT("CameraSocket"));
 	CameraComponent->bUsePawnControlRotation = true;
 
-	HelmetMesh = CreateDefaultSubobject<USkeletalMeshComponent>("HelmetMesh");
-	HelmetMesh->SetupAttachment(GetMesh());
-	HelmetMesh->SetMasterPoseComponent(GetMesh());
-
-	ChestMesh = CreateDefaultSubobject<USkeletalMeshComponent>("ChestMesh");
-	ChestMesh->SetupAttachment(GetMesh());
-	ChestMesh->SetMasterPoseComponent(GetMesh());
-
-	LegsMesh = CreateDefaultSubobject<USkeletalMeshComponent>("LegsMesh");
-	LegsMesh->SetupAttachment(GetMesh());
-	LegsMesh->SetMasterPoseComponent(GetMesh());
-
-	FeetMesh = CreateDefaultSubobject<USkeletalMeshComponent>("FeetMesh");
-	FeetMesh->SetupAttachment(GetMesh());
-	FeetMesh->SetMasterPoseComponent(GetMesh());
-
-	VestMesh = CreateDefaultSubobject<USkeletalMeshComponent>("VestMesh");
-	VestMesh->SetupAttachment(GetMesh());
-	VestMesh->SetMasterPoseComponent(GetMesh());
-
-	HandsMesh = CreateDefaultSubobject<USkeletalMeshComponent>("HandsMesh");
-	HandsMesh->SetupAttachment(GetMesh());
-	HandsMesh->SetMasterPoseComponent(GetMesh());
-
-	BackpackMesh = CreateDefaultSubobject<USkeletalMeshComponent>("BackpackMesh");
-	BackpackMesh->SetupAttachment(GetMesh());
-	BackpackMesh->SetMasterPoseComponent(GetMesh());
-
 	GetMesh()->SetOwnerNoSee(true);
 
 	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Player Inventory"));
